@@ -1,0 +1,121 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Colour widget</title>
+<link rel="stylesheet" href="http://localhost:8000/static/css/task-style.css">
+<style>
+    td { min-width: 25px; height: 25 px;}
+    td::after { content:"\00A0"; font-size: 25px; line-height: 25 px; }
+    .colourpicker { min-width: 150px; max-width: 300px; }
+    .close-colour-picker { display: block; text-align: right;}
+</style>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"  crossorigin="anonymous"></script>
+<script>
+    var stgs = {
+        "styles":["task-green","task-red","task-yellow","task-blue","task-orange"],
+        "rowWidth": 5,
+        "valfield": "my_colour",
+        };
+    (function(){
+    
+        $.fn.colourpicker = function(settings){ 
+            el = this;
+            is_defined = function(v){ 
+                return typeof(v)=="undefined"; 
+                }
+            console.log(is_defined(settings.styles));
+            try{
+                if(!is_defined(settings.styles)) throw "No theme";
+                if(!is_defined(settings.valfield)) throw "No valfield";
+                this.themes = settings.styles;
+                this.valfield = settings.valfield;
+            }
+                
+            catch(err){  
+                alert("No theme, reverting to HTML.");
+                return false;
+            }
+            this.rowWidth = settings.rowWidth || 4;
+            console.log(this.themes);
+            this.createContainer = function()
+            {
+                //console.log(el.offset());
+                div = $("<div/>",{
+                    "class": "colourpicker dropdown-menu dropdown-menu-left",
+                });
+                closer = $("<a/>",{ "class":"close-colour-picker", });
+                close_glyph = $("<span/>",{ "class": "glyphicon glyphicon-remove", });
+                closer.append(close_glyph);
+                closer.append("Close");
+                div.append(closer);
+                help_text = $("<p>Pick a theme:</p>");
+                div.append(help_text);
+               //console.log(div);
+               return $(div);
+            };
+            
+            this.positionContainer = function(){
+                //console.log("Position container:" + this.div);
+                
+                this.div.offset(
+                {
+                    left:$(el).offset().left + $(el).outerWidth(),
+                }
+                );
+            }
+            
+            //this.positionContainer = function() { return false; }
+            this.createTable = function(){
+                tblContainer = $("<table/>",{
+                   "class":"table",
+                });
+                max_width = $(el).width();
+                for(var i=0; i<=this.themes.length; i++){
+                 theme = this.themes[i]; 
+                 td = $("<td/>",{"class":theme});
+                 curr_width = $(td).css( 'width' );
+                 console.log(curr_width);
+                 if(i % this.rowWidth == 0){ 
+                    tblContainer.append($("<tr/>"));
+                 }
+                 $(td).appendTo(tblContainer);
+                }
+                return $(tblContainer);
+            }
+            this.attachTable = function(){ 
+                table = this.createTable();
+                table.appendTo(this.div);
+            }
+            
+            this.div = this.createContainer();
+            this.div.insertAfter(el);
+            this.attachTable();
+            this.positionContainer();
+            $(".colourpicker").on('click', 'td', function(e){ 
+                e.stopPropagation(); 
+                e.preventDefault();               
+                $("#my_colour").val(e.target.className); 
+                } ); 
+        }
+    
+    }(jQuery));
+
+    $(document).ready(
+        function(){
+        $("#the_button").colourpicker(rows);
+        }
+        );
+</script>
+</head>
+<body>
+<h1>Hey!</h1>
+
+<div class="dropdown">
+<label for="my_colour">Colour:</label> <input id="my_colour" type="text" value="...">
+<button id="the_button" data-toggle="dropdown">Choose colour</button>
+</div>
+</body>
+</html>
